@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
-
+var http = require('http');
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
  * Consider using the `paths` object below to store frequently used file paths. This way,
@@ -31,7 +31,13 @@ exports.initialize = function(pathsObj) {
 exports.readListOfUrls = function(callback) {
   fs.readFile(this.paths.list, (err, data) => {
     if(err) throw err;  
-    callback(data.toString().split('\n'));
+    // data.toString().split('\n').pop();
+    // console.log('Data before pop ', data.toString().split('\n'));
+    // console.log('Popped ', data.toString().split('\n').pop());
+    // console.log('What is data now? ', data.toString());
+    var urls = data.toString().split('\n');
+    urls.pop()
+    callback(urls);
   })
 };
 
@@ -61,6 +67,24 @@ exports.isUrlArchived = function(url, callback) {
 
 
 exports.downloadUrls = function(urls) {
+   _.each(urls, function(url){
+    http.get('http://' + url, (res) => {
+      var data = '';
+      res.on('data', function(chunk) {
+        data += chunk;
+      }).on('end', function() {
+
+        console.log(url);
+        fs.writeFile(exports.paths.archivedSites + '/' + url, data, (err) => {
+          if(err) throw err;
+        })
+      })
+    }).on('error', (err) => {
+      console.log('Need to fix????')
+      // console.log('error');
+    })
+   })
+  
   //urls is an array.
 };
 

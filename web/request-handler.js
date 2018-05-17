@@ -7,23 +7,23 @@ var fs = require('fs');
 exports.handleRequest = function (req, res) {
 
 
-  if(req.method === 'GET') {
-    if(req.url === '/') {
+  if (req.method === 'GET') {
+    if (req.url === '/') {
       fs.readFile(archive.paths.index, (err, data) => {
-        if(err) throw err;
+        if (err) { throw err; }
         res.writeHead(200, helpers.headers);
         res.write(data);
         res.end(); 
-      })    
+      });    
     } else {    
       fs.readFile(archive.paths.archivedSites + req.url, (err, data) => {
-        if(err) {
-          fs.readFile(archive.paths.loading, (err,data) => {
-            if(err) throw err;
+        if (err) {
+          fs.readFile(archive.paths.loading, (err, data) => {
+            if (err) { throw err; }
             res.writeHead(404, helpers.headers);
             res.write(data);
             res.end();
-          })        
+          });        
         } else {
           res.writeHead(200, helpers.headers);
           res.write(data);
@@ -31,12 +31,12 @@ exports.handleRequest = function (req, res) {
           
         }
         
-      })       
+      });       
     }    
   }
 
   
-  if(req.method === 'POST') {
+  if (req.method === 'POST') {
     var requestURL = '';
     req.on('data', function(chunk) {
       requestURL += chunk;
@@ -44,29 +44,41 @@ exports.handleRequest = function (req, res) {
       
       requestURL = requestURL.slice(4);
       
-      archive.addUrlToList(requestURL);
-      res.writeHead(302, helpers.headers);
-      res.end();
+      fs.readFile(archive.paths.archivedSites + '/' + requestURL, (err, data) => {
+        if (err) {
+          fs.readFile(archive.paths.loading, (err, data) => {
+            if (err) { throw err; }
             
-      // fs.appendFile(archive.paths.list, requestURL + '\n', (err) => {
-      //   if(err) throw err;
-      //   res.writeHead(302, helpers.headers);
-      //   res.end();
-      // })
+            archive.addUrlToList(requestURL, function() {
+              res.writeHead(302, helpers.headers);
+              res.end();
+              
+            });
+            res.writeHead(404, helpers.headers);
+            res.write(data);
+            res.end();
+          } );         
+        } else {
+          res.writeHead(302, helpers.headers);
+          res.write(data);
+          res.end();         
+        }
+      });
       
       
-      // fs.readdir(archive.paths.archivedSites, function(err, items) {
-      //   if(err) throw err;
-      //   if(!items.includes(requestURL)) {
+      
+      // if(archive.isUrlInList(requestURL, ))
+      
+      
+      //       exports.isUrlInList = function(url, callback) {
+      //   this.readListOfUrls(function(list) {
+      //     callback(list.includes(url));
+      //   })  
+      // };
+      
+      
 
-      //   } else {
-      //     res.writeHead(302, helpers.headers);
-      //     res.end();        
-      //   }
-      
-      // });
-
-    })     
+    });     
     
   }
 
