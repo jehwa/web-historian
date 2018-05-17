@@ -29,32 +29,36 @@ exports.initialize = function(pathsObj) {
 // modularize your code. Keep it clean!
 
 exports.readListOfUrls = function(callback) {
-  //reading sites.txt file
-  //return an array of sites
-  return callback(paths.list.bind(this), (err, data) =>{
-    if(err) throw err;
-    return data.split('/n');
-  }) 
+  fs.readFile(this.paths.list, (err, data) => {
+    if(err) throw err;  
+    callback(data.toString().split('\n'));
+  })
 };
 
 
-// fs.readFile(archive.paths.archivedSites + '/' +requestURL, (err, data) => {
-// // if(err) throw err;
-// console.log(archive.paths.archivedSites + '/' +requestURL);
-// console.log(data, '=================================================================');
-// res.writeHead(200, helpers.headers);
-// res.write(data);
-// res.end();
-
 exports.isUrlInList = function(url, callback) {
-  
+  this.readListOfUrls(function(list) {
+    callback(list.includes(url));
+  })  
 };
 
 exports.addUrlToList = function(url, callback) {
+  fs.appendFile(this.paths.list, url + '\n', (err) => {
+    if(err) throw err;
+    callback();
+  })
 };
 
+
+
 exports.isUrlArchived = function(url, callback) {
+  fs.readdir(this.paths.archivedSites, function(err, items) {
+    if(err) throw err;
+    callback(items.includes(url));
+  })
 };
+
+
 
 exports.downloadUrls = function(urls) {
   //urls is an array.

@@ -44,11 +44,17 @@ exports.handleRequest = function (req, res) {
       
       requestURL = requestURL.slice(4);
       
-        fs.appendFile(archive.paths.list, requestURL + '\n', (err) => {
-          if(err) throw err;
-          res.writeHead(302, helpers.headers);
-          res.end();
-        })
+      archive.addUrlToList(requestURL);
+      res.writeHead(302, helpers.headers);
+      res.end();
+            
+      // fs.appendFile(archive.paths.list, requestURL + '\n', (err) => {
+      //   if(err) throw err;
+      //   res.writeHead(302, helpers.headers);
+      //   res.end();
+      // })
+      
+      
       // fs.readdir(archive.paths.archivedSites, function(err, items) {
       //   if(err) throw err;
       //   if(!items.includes(requestURL)) {
